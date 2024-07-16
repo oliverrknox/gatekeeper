@@ -17,8 +17,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(registry ->
-                registry.requestMatchers(new AntPathRequestMatcher("/users"))
-                        .permitAll()
+                registry.requestMatchers(
+                        new AntPathRequestMatcher("/users"),
+                        new AntPathRequestMatcher("/v3/api-docs*/**"),
+                        new AntPathRequestMatcher("/swagger-ui/**")
+                ).permitAll()
         );
 
         return httpSecurity.build();

@@ -12,16 +12,16 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public CreateUserResponseDTO createUser(CreateUserRequestDTO request) {
-        var hash = passwordEncoder.encode(request.password());
-        var user = new UserModel(request.username(), hash);
+    public CreateUserResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO) {
+        var passwordHash = passwordEncoder.encode(createUserRequestDTO.password());
+        var userModel = new UserModel(createUserRequestDTO.username(), passwordHash);
 
-        var newUser = repository.save(user);
+        var savedUser = userRepository.save(userModel);
 
-        return new CreateUserResponseDTO(newUser.getId(), newUser.getUsername());
+        return new CreateUserResponseDTO(savedUser.getId(), savedUser.getUsername());
     }
 }
