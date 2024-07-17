@@ -2,7 +2,11 @@ package net.gb.knox.gatekeeper.exception;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.Map;
 
@@ -22,13 +26,30 @@ public class GlobalExceptionHandlerTest {
 
     @Test
     public void testHandleUserNotFoundException() {
-        var userNotFoundException = new UserNotFoundException(MESSAGE, ERRORS_BY_FIELD);
+        final var userNotFoundException = new UserNotFoundException(MESSAGE, ERRORS_BY_FIELD);
+
         var responseEntity = globalExceptionHandler.handleUserNotFoundException(userNotFoundException);
 
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertNotNull(responseEntity.getBody());
         assertEquals(MESSAGE, responseEntity.getBody().message());
         assertEquals(ERRORS_BY_FIELD, responseEntity.getBody().errorsByField());
+    }
+
+    @Test
+    public void testHandleValidationException() {
+        final var bindingResult = new BeanPropertyBindingResult(null, "ObjectName");
+        bindingResult.addError(new FieldError("ObjectName", "Field", "Validation message."));
+        final var methodParameter = new MethodParameter(this.getClass().getMethods()[0], -1);
+        final var methodArgumentNotValidException = new MethodArgumentNotValidException(methodParameter, bindingResult);
+
+        var responseEntity = globalExceptionHandler.handleValidationException(methodArgumentNotValidException);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals("Validation failed.", responseEntity.getBody().message());
+        assertNotNull(responseEntity.getBody().errorsByField());
+        assertEquals("Validation message.", responseEntity.getBody().errorsByField().get("Field"));
     }
 
     @Test

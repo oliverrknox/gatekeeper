@@ -24,8 +24,21 @@ public class UserRepositoryTest {
         var savedUser = userRepository.save(USER_MODEL);
 
         assertNotNull(savedUser.getId());
-        assertEquals("TestUser", savedUser.getUsername());
-        assertEquals("TestHash", savedUser.getPasswordHash());
+        assertEquals(USER_MODEL.getUsername(), savedUser.getUsername());
+        assertEquals(USER_MODEL.getPasswordHash(), savedUser.getPasswordHash());
+    }
+
+    @Test
+    public void testSaveAsUpdate() {
+        final var username = "UpdateUser";
+        var newUser = userRepository.save(USER_MODEL);
+
+        var updatedUser = new UserModel(newUser.getId(), username, newUser.getPasswordHash());
+        var savedUser = userRepository.save(updatedUser);
+
+        assertNotNull(savedUser.getId());
+        assertEquals(username, savedUser.getUsername());
+        assertEquals(USER_MODEL.getPasswordHash(), newUser.getPasswordHash());
     }
 
     @Test

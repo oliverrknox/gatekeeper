@@ -20,6 +20,12 @@ public class UserModel {
         this.passwordHash = passwordHash;
     }
 
+    public UserModel(Long id, String username, String passwordHash) {
+        this.id = id;
+        this.username = username;
+        this.passwordHash = passwordHash;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }

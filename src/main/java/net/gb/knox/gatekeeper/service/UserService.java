@@ -2,6 +2,7 @@ package net.gb.knox.gatekeeper.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import net.gb.knox.gatekeeper.dto.CreateUserRequestDTO;
+import net.gb.knox.gatekeeper.dto.UpdateUserRequestDTO;
 import net.gb.knox.gatekeeper.dto.UserResponseDTO;
 import net.gb.knox.gatekeeper.exception.UserNotFoundException;
 import net.gb.knox.gatekeeper.model.UserModel;
@@ -33,6 +34,20 @@ public class UserService {
         try {
             var existingUser = userRepository.getReferenceById(id);
             return new UserResponseDTO(existingUser.getId(), existingUser.getUsername());
+        } catch (EntityNotFoundException exception) {
+            throw new UserNotFoundException(
+                    "No user found.",
+                    Map.of("Id", "No user with Id = " + id + ".")
+            );
+        }
+    }
+
+    public UserResponseDTO updateUser(Long id, UpdateUserRequestDTO updateUserRequestDTO) throws UserNotFoundException {
+        try {
+            var existingUser = userRepository.getReferenceById(id);
+            var updatedUser = new UserModel(id, updateUserRequestDTO.username(), existingUser.getPasswordHash());
+            var savedUser = userRepository.save(updatedUser);
+            return new UserResponseDTO(savedUser.getId(), savedUser.getUsername());
         } catch (EntityNotFoundException exception) {
             throw new UserNotFoundException(
                     "No user found.",

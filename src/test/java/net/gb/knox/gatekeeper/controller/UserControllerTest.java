@@ -1,6 +1,7 @@
 package net.gb.knox.gatekeeper.controller;
 
 import net.gb.knox.gatekeeper.dto.CreateUserRequestDTO;
+import net.gb.knox.gatekeeper.dto.UpdateUserRequestDTO;
 import net.gb.knox.gatekeeper.dto.UserResponseDTO;
 import net.gb.knox.gatekeeper.exception.UserNotFoundException;
 import net.gb.knox.gatekeeper.service.UserService;
@@ -26,7 +27,9 @@ public class UserControllerTest {
 
     private static final Long USER_ID = 1L;
     private static final CreateUserRequestDTO CREATE_USER_REQUEST_DTO = new CreateUserRequestDTO("TestUser", "TestPassword1");
+    private static final UpdateUserRequestDTO UPDATE_USER_REQUEST_DTO = new UpdateUserRequestDTO("UpdateUser");
     private static final UserResponseDTO USER_RESPONSE_DTO = new UserResponseDTO(USER_ID, "TestUser");
+    private static final UserResponseDTO UPDATED_USER_RESPONSE_DTO = new UserResponseDTO(USER_ID, UPDATE_USER_REQUEST_DTO.username());
     private static final UserNotFoundException USER_NOT_FOUND_EXCEPTION = new UserNotFoundException("Test user not found.");
 
     @Test
@@ -57,6 +60,25 @@ public class UserControllerTest {
         when(userService.getUserById(USER_ID)).thenThrow(USER_NOT_FOUND_EXCEPTION);
 
         var exception = assertThrows(UserNotFoundException.class, () -> userController.getUser(USER_ID));
+
+        assertEquals(USER_NOT_FOUND_EXCEPTION, exception);
+    }
+
+    @Test
+    public void testUpdateUser() throws UserNotFoundException {
+        when(userService.updateUser(USER_ID, UPDATE_USER_REQUEST_DTO)).thenReturn(UPDATED_USER_RESPONSE_DTO);
+
+        var responseEntity = userController.updateUser(USER_ID, UPDATE_USER_REQUEST_DTO);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(UPDATED_USER_RESPONSE_DTO, responseEntity.getBody());
+    }
+
+    @Test
+    public void testUpdateUserException() throws UserNotFoundException {
+        when(userService.updateUser(USER_ID, UPDATE_USER_REQUEST_DTO)).thenThrow(USER_NOT_FOUND_EXCEPTION);
+
+        var exception = assertThrows(UserNotFoundException.class, () -> userController.updateUser(USER_ID, UPDATE_USER_REQUEST_DTO));
 
         assertEquals(USER_NOT_FOUND_EXCEPTION, exception);
     }
