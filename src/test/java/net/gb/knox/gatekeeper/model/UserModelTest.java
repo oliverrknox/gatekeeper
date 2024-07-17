@@ -7,21 +7,34 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class UserModelTest {
 
+    private static final Long USER_ID = 1L;
+    private static final String USERNAME = "TestUser";
+    private static final String PASSWORD_HASH = "TestHash";
+
+    @Test
+    public void testEmptyConstructor() {
+        var userModel = new UserModel();
+
+        assertNull(userModel.getId());
+        assertNull(userModel.getUsername());
+        assertNull(userModel.getPasswordHash());
+    }
+
     @Test
     public void testConstructor() {
-        var userModel = new UserModel("TestUser", "abc-def-ghi");
+        var userModel = new UserModel(USERNAME, PASSWORD_HASH);
 
-        assertEquals("TestUser", userModel.getUsername());
-        assertEquals("abc-def-ghi", userModel.getPasswordHash());
+        assertEquals(USERNAME, userModel.getUsername());
+        assertEquals(PASSWORD_HASH, userModel.getPasswordHash());
         assertNull(userModel.getId());
     }
 
     @Test
     public void testSetId() {
-        var userModel = new UserModel("TestUser", "abc-def-ghi");
+        var userModel = new UserModel(USERNAME, PASSWORD_HASH);
 
-        userModel.setId(1L);
+        userModel.setId(USER_ID);
 
-        assertEquals(1L, userModel.getId());
+        assertEquals(USER_ID, userModel.getId());
     }
 }

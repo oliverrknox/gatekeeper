@@ -2,6 +2,7 @@ package net.gb.knox.gatekeeper.controller;
 
 import net.gb.knox.gatekeeper.dto.CreateUserRequestDTO;
 import net.gb.knox.gatekeeper.dto.UserResponseDTO;
+import net.gb.knox.gatekeeper.exception.UserNotFoundException;
 import net.gb.knox.gatekeeper.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,7 @@ import org.springframework.http.HttpStatus;
 
 import java.net.URISyntaxException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -24,19 +24,40 @@ public class UserControllerTest {
     @MockBean
     private UserService userService;
 
+    private static final Long USER_ID = 1L;
     private static final CreateUserRequestDTO CREATE_USER_REQUEST_DTO = new CreateUserRequestDTO("TestUser", "TestPassword1");
-    private static final UserResponseDTO CREATE_USER_RESPONSE_DTO = new UserResponseDTO(1L, "TestUser");
+    private static final UserResponseDTO USER_RESPONSE_DTO = new UserResponseDTO(USER_ID, "TestUser");
+    private static final UserNotFoundException USER_NOT_FOUND_EXCEPTION = new UserNotFoundException("Test user not found.");
 
     @Test
     public void testCreateUser() throws URISyntaxException {
-        when(userService.createUser(CREATE_USER_REQUEST_DTO)).thenReturn(CREATE_USER_RESPONSE_DTO);
+        when(userService.createUser(CREATE_USER_REQUEST_DTO)).thenReturn(USER_RESPONSE_DTO);
 
         var responseEntity = userController.createUser(CREATE_USER_REQUEST_DTO);
-        var location = "/users/" + CREATE_USER_RESPONSE_DTO.id();
+        var location = "/users/" + USER_RESPONSE_DTO.id();
 
         assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
         assertNotNull(responseEntity.getHeaders().getLocation());
         assertEquals(location, responseEntity.getHeaders().getLocation().toString());
-        assertEquals(CREATE_USER_RESPONSE_DTO, responseEntity.getBody());
+        assertEquals(USER_RESPONSE_DTO, responseEntity.getBody());
+    }
+
+    @Test
+    public void testGetUser() throws UserNotFoundException {
+        when(userService.getUserById(USER_ID)).thenReturn(USER_RESPONSE_DTO);
+
+        var responseEntity = userController.getUser(USER_ID);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(USER_RESPONSE_DTO, responseEntity.getBody());
+    }
+
+    @Test
+    public void testGetUserException() throws UserNotFoundException {
+        when(userService.getUserById(USER_ID)).thenThrow(USER_NOT_FOUND_EXCEPTION);
+
+        var exception = assertThrows(UserNotFoundException.class, () -> userController.getUser(USER_ID));
+
+        assertEquals(USER_NOT_FOUND_EXCEPTION, exception);
     }
 }

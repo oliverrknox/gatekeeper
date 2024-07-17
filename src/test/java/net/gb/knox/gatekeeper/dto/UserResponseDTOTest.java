@@ -8,9 +8,9 @@ public class UserResponseDTOTest {
 
     @Test
     public void testConstructor() {
-        var createUserResponseDTO = new UserResponseDTO(1L, "TestUser");
+        var userResponseDTO = new UserResponseDTO(1L, "TestUser");
 
-        assertEquals(1L, createUserResponseDTO.id());
-        assertEquals("TestUser", createUserResponseDTO.username());
+        assertEquals(1L, userResponseDTO.id());
+        assertEquals("TestUser", userResponseDTO.username());
     }
 }

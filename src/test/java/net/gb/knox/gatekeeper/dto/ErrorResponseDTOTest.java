@@ -23,7 +23,7 @@ public class ErrorResponseDTOTest {
     }
 
     @Test
-    public void testConstructorWithOnlyMessage() {
+    public void testConstructorVariant_message() {
         var errorResponseDTO = new ErrorResponseDTO("Test message.");
 
         assertEquals("Test message.", errorResponseDTO.message());

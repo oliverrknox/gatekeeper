@@ -9,9 +9,11 @@ public class UserModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String username;
+    private String passwordHash;
 
-    private final String username;
-    private final String passwordHash;
+    public UserModel() {
+    }
 
     public UserModel(String username, String passwordHash) {
         this.username = username;
@@ -26,8 +28,16 @@ public class UserModel {
         return id;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getUsername() {
         return username;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public String getPasswordHash() {

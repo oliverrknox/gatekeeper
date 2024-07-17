@@ -8,13 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import net.gb.knox.gatekeeper.dto.CreateUserRequestDTO;
 import net.gb.knox.gatekeeper.dto.ErrorResponseDTO;
 import net.gb.knox.gatekeeper.dto.UserResponseDTO;
+import net.gb.knox.gatekeeper.exception.UserNotFoundException;
 import net.gb.knox.gatekeeper.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -47,9 +45,15 @@ public class UserController {
     })
     @PostMapping()
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) throws URISyntaxException {
-        var createUserResponseDTO = userService.createUser(createUserRequestDTO);
+        var userResponseDTO = userService.createUser(createUserRequestDTO);
         return ResponseEntity
-                .created(new URI("/users/" + createUserResponseDTO.id()))
-                .body(createUserResponseDTO);
+                .created(new URI("/users/" + userResponseDTO.id()))
+                .body(userResponseDTO);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> getUser(@RequestParam Long id) throws UserNotFoundException {
+        var userResponseDTO = userService.getUserById(id);
+        return ResponseEntity.ok(userResponseDTO);
     }
 }
