@@ -1,7 +1,7 @@
 package net.gb.knox.gatekeeper.controller;
 
 import net.gb.knox.gatekeeper.dto.CreateUserRequestDTO;
-import net.gb.knox.gatekeeper.dto.CreateUserResponseDTO;
+import net.gb.knox.gatekeeper.dto.UserResponseDTO;
 import net.gb.knox.gatekeeper.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class UserControllerTest {
     private UserService userService;
 
     private static final CreateUserRequestDTO CREATE_USER_REQUEST_DTO = new CreateUserRequestDTO("TestUser", "TestPassword1");
-    private static final CreateUserResponseDTO CREATE_USER_RESPONSE_DTO = new CreateUserResponseDTO(1L, "TestUser");
+    private static final UserResponseDTO CREATE_USER_RESPONSE_DTO = new UserResponseDTO(1L, "TestUser");
 
     @Test
     public void testCreateUser() throws URISyntaxException {

@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CreateUserResponseDTOTest {
+public class UserResponseDTOTest {
 
     @Test
     public void testConstructor() {
-        var createUserResponseDTO = new CreateUserResponseDTO(1L, "TestUser");
+        var createUserResponseDTO = new UserResponseDTO(1L, "TestUser");
 
         assertEquals(1L, createUserResponseDTO.id());
         assertEquals("TestUser", createUserResponseDTO.username());

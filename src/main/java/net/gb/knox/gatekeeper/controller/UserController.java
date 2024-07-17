@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import net.gb.knox.gatekeeper.dto.CreateUserRequestDTO;
-import net.gb.knox.gatekeeper.dto.CreateUserResponseDTO;
 import net.gb.knox.gatekeeper.dto.ErrorResponseDTO;
+import net.gb.knox.gatekeeper.dto.UserResponseDTO;
 import net.gb.knox.gatekeeper.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,7 @@ public class UserController {
                     description = "Created user.",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = CreateUserResponseDTO.class)
+                            schema = @Schema(implementation = UserResponseDTO.class)
                     )
             ),
             @ApiResponse(
@@ -46,7 +46,7 @@ public class UserController {
             )
     })
     @PostMapping()
-    public ResponseEntity<CreateUserResponseDTO> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) throws URISyntaxException {
+    public ResponseEntity<UserResponseDTO> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) throws URISyntaxException {
         var createUserResponseDTO = userService.createUser(createUserRequestDTO);
         return ResponseEntity
                 .created(new URI("/users/" + createUserResponseDTO.id()))
