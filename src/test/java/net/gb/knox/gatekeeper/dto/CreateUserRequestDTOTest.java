@@ -1,5 +1,6 @@
 package net.gb.knox.gatekeeper.dto;
 
+import net.gb.knox.gatekeeper.annotation.ValidatorFixture;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -12,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CreateUserRequestDTOTest {
 
-    private static final ValidatorFixture validatorFixture = new ValidatorFixture();
+    private static final ValidatorFixture VALIDATOR_FIXTURE = new ValidatorFixture();
 
     @AfterAll()
     public static void tearDown() throws Exception {
-        validatorFixture.close();
+        VALIDATOR_FIXTURE.close();
     }
 
     @Test
@@ -39,7 +40,7 @@ public class CreateUserRequestDTOTest {
         Collections.sort(expectedErrorMessages);
         var createUserRequestDTO = new CreateUserRequestDTO("", "");
 
-        var violations = validatorFixture.getValidator().validate(createUserRequestDTO);
+        var violations = VALIDATOR_FIXTURE.getValidator().validate(createUserRequestDTO);
 
         var actualErrorMessages = new ArrayList<String>();
         violations.iterator().forEachRemaining(item -> actualErrorMessages.add(item.getMessage()));

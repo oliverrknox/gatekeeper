@@ -1,4 +1,4 @@
-package net.gb.knox.gatekeeper.dto;
+package net.gb.knox.gatekeeper.annotation;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -19,7 +19,7 @@ public class ValidatorFixture implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         validatorFactory.close();
     }
 }
