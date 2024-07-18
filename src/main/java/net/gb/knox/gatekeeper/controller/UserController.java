@@ -53,18 +53,102 @@ public class UserController {
                 .body(userResponseDTO);
     }
 
+    @Operation(summary = "Get a user by id.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Got user.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Generic error.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUser(@PathVariable Long id) throws UserNotFoundException {
         var userResponseDTO = userService.getUser(id);
         return ResponseEntity.ok(userResponseDTO);
     }
 
+    @Operation(
+            summary = "Update a user's properties.",
+            description = "The username and/or password can be updated via this endpoint."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Updated user.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Generic error.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO) throws UserNotFoundException {
         var userResponseDTO = userService.updateUser(id, updateUserRequestDTO);
         return ResponseEntity.ok(userResponseDTO);
     }
 
+    @Operation(summary = "Delete a user by id.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Deleted user.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Generic error.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) throws UserNotFoundException {
         userService.deleteUser(id);
