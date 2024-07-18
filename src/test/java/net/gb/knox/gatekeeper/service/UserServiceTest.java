@@ -1,6 +1,5 @@
 package net.gb.knox.gatekeeper.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import net.gb.knox.gatekeeper.dto.CreateUserRequestDTO;
 import net.gb.knox.gatekeeper.dto.UpdateUserRequestDTO;
 import net.gb.knox.gatekeeper.exception.UserNotFoundException;
@@ -12,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,27 +63,25 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testGetUserById() throws UserNotFoundException {
-        when(userRepository.getReferenceById(anyLong())).thenReturn(USER_MODEL);
+    public void testGetUser() throws UserNotFoundException {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(USER_MODEL));
 
-        var userResponseDTO = userService.getUserById(USER_ID);
+        var userResponseDTO = userService.getUser(USER_ID);
 
         assertEquals(USER_ID, userResponseDTO.id());
         assertEquals(CREATE_USER_REQUEST_DTO.username(), userResponseDTO.username());
     }
 
     @Test
-    public void testGetUserByIdException() {
-        when(userRepository.getReferenceById(anyLong())).thenThrow(new EntityNotFoundException());
-
-        var exception = assertThrows(UserNotFoundException.class, () -> userService.getUserById(USER_ID));
+    public void testGetUserException() {
+        var exception = assertThrows(UserNotFoundException.class, () -> userService.getUser(USER_ID));
 
         assertNotNull(exception);
     }
 
     @Test
     public void testUpdateUser() throws UserNotFoundException {
-        when(userRepository.getReferenceById(anyLong())).thenReturn(USER_MODEL);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(USER_MODEL));
         when(userRepository.save(any(UserModel.class))).thenReturn(UPDATED_USER_MODEL);
 
         var userResponseDTO = userService.updateUser(USER_ID, UPDATE_USER_REQUEST_DTO);
@@ -93,13 +92,26 @@ public class UserServiceTest {
 
     @Test
     public void testUpdateUserException() {
-        when(userRepository.getReferenceById(anyLong())).thenThrow(new EntityNotFoundException());
         when(userRepository.save(any(UserModel.class))).thenReturn(UPDATED_USER_MODEL);
 
         var exception = assertThrows(
                 UserNotFoundException.class,
                 () -> userService.updateUser(USER_ID, UPDATE_USER_REQUEST_DTO)
         );
+
+        assertNotNull(exception);
+    }
+
+    @Test
+    public void testDeleteUser() throws UserNotFoundException {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(USER_MODEL));
+
+        userService.deleteUser(USER_ID);
+    }
+
+    @Test
+    public void testDeleteUserException() {
+        var exception = assertThrows(UserNotFoundException.class, () -> userService.deleteUser(USER_ID));
 
         assertNotNull(exception);
     }

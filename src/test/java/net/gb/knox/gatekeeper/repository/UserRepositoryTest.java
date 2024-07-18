@@ -1,6 +1,6 @@
 package net.gb.knox.gatekeeper.repository;
 
-import jakarta.persistence.EntityNotFoundException;
+import net.gb.knox.gatekeeper.exception.UserNotFoundException;
 import net.gb.knox.gatekeeper.model.UserModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +42,11 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testGetReferenceById() {
+    public void testFindById() {
         var savedUser = userRepository.save(USER_MODEL);
         entityManager.flush();
 
-        var foundUser = userRepository.getReferenceById(savedUser.getId());
+        var foundUser = userRepository.findById(savedUser.getId()).orElseThrow();
 
         assertEquals(savedUser.getId(), foundUser.getId());
         assertEquals(USER_MODEL.getUsername(), foundUser.getUsername());
@@ -54,13 +54,9 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testGetReferenceByIdException() {
-        var exception = assertThrows(EntityNotFoundException.class, () -> {
-            // `getReferenceById` is lazy, so it will only throw after accessing proxy.
-            //  noinspection ResultOfMethodCallIgnored
-            userRepository
-                    .getReferenceById(1L)
-                    .getUsername();
+    public void testFindByIdException() {
+        var exception = assertThrows(UserNotFoundException.class, () -> {
+            userRepository.findById(1L).orElseThrow(UserNotFoundException::new);
         });
 
         assertNotNull(exception);

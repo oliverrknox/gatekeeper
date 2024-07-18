@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -58,7 +59,7 @@ public class UserControllerTest {
 
     @Test
     public void testGetUser() throws UserNotFoundException {
-        when(userService.getUserById(USER_ID)).thenReturn(USER_RESPONSE_DTO);
+        when(userService.getUser(USER_ID)).thenReturn(USER_RESPONSE_DTO);
 
         var responseEntity = userController.getUser(USER_ID);
 
@@ -68,7 +69,7 @@ public class UserControllerTest {
 
     @Test
     public void testGetUserException() throws UserNotFoundException {
-        when(userService.getUserById(USER_ID)).thenThrow(USER_NOT_FOUND_EXCEPTION);
+        when(userService.getUser(USER_ID)).thenThrow(USER_NOT_FOUND_EXCEPTION);
 
         var exception = assertThrows(UserNotFoundException.class, () -> userController.getUser(USER_ID));
 
@@ -90,6 +91,22 @@ public class UserControllerTest {
         when(userService.updateUser(USER_ID, UPDATE_USER_REQUEST_DTO)).thenThrow(USER_NOT_FOUND_EXCEPTION);
 
         var exception = assertThrows(UserNotFoundException.class, () -> userController.updateUser(USER_ID, UPDATE_USER_REQUEST_DTO));
+
+        assertEquals(USER_NOT_FOUND_EXCEPTION, exception);
+    }
+
+    @Test
+    public void testDeleteUser() throws UserNotFoundException {
+        var responseEntity = userController.deleteUser(USER_ID);
+
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void testDeleteUserException() throws UserNotFoundException {
+        doThrow(USER_NOT_FOUND_EXCEPTION).when(userService).deleteUser(USER_ID);
+
+        var exception = assertThrows(UserNotFoundException.class, () -> userController.deleteUser(USER_ID));
 
         assertEquals(USER_NOT_FOUND_EXCEPTION, exception);
     }

@@ -1,6 +1,5 @@
 package net.gb.knox.gatekeeper.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import net.gb.knox.gatekeeper.dto.CreateUserRequestDTO;
 import net.gb.knox.gatekeeper.dto.UpdateUserRequestDTO;
 import net.gb.knox.gatekeeper.dto.UserResponseDTO;
@@ -30,38 +29,34 @@ public class UserService {
         return new UserResponseDTO(savedUser.getId(), savedUser.getUsername());
     }
 
-    public UserResponseDTO getUserById(Long id) throws UserNotFoundException {
-        try {
-            var existingUser = userRepository.getReferenceById(id);
-            return new UserResponseDTO(existingUser.getId(), existingUser.getUsername());
-        } catch (EntityNotFoundException exception) {
-            throw new UserNotFoundException(
-                    "No user found.",
-                    Map.of("Id", "No user with Id = " + id + ".")
-            );
-        }
+    public UserResponseDTO getUser(Long id) throws UserNotFoundException {
+        var existingUser = userRepository.findById(id).orElseThrow(() ->
+                new UserNotFoundException("No user found.", Map.of("Id", "No user with Id = " + id + "."))
+        );
+        return new UserResponseDTO(existingUser.getId(), existingUser.getUsername());
     }
 
     public UserResponseDTO updateUser(Long id, UpdateUserRequestDTO updateUserRequestDTO) throws UserNotFoundException {
-        try {
-            var existingUser = userRepository.getReferenceById(id);
+        var existingUser = userRepository.findById(id).orElseThrow(() ->
+                new UserNotFoundException("No user found.", Map.of("Id", "No user with Id = " + id + "."))
+        );
+        var username = updateUserRequestDTO.username() == null
+                ? existingUser.getUsername()
+                : updateUserRequestDTO.username();
+        var passwordHash = updateUserRequestDTO.password() == null
+                ? existingUser.getPasswordHash()
+                : passwordEncoder.encode(updateUserRequestDTO.password());
 
-            var username = updateUserRequestDTO.username() == null
-                    ? existingUser.getUsername()
-                    : updateUserRequestDTO.username();
-            var passwordHash = updateUserRequestDTO.password() == null
-                    ? existingUser.getPasswordHash()
-                    : passwordEncoder.encode(updateUserRequestDTO.password());
+        var updatedUser = new UserModel(id, username, passwordHash);
+        var savedUser = userRepository.save(updatedUser);
 
-            var updatedUser = new UserModel(id, username, passwordHash);
-            var savedUser = userRepository.save(updatedUser);
+        return new UserResponseDTO(savedUser.getId(), savedUser.getUsername());
+    }
 
-            return new UserResponseDTO(savedUser.getId(), savedUser.getUsername());
-        } catch (EntityNotFoundException exception) {
-            throw new UserNotFoundException(
-                    "No user found.",
-                    Map.of("Id", "No user with Id = " + id + ".")
-            );
-        }
+    public void deleteUser(Long id) throws UserNotFoundException {
+        userRepository.findById(id).orElseThrow(() ->
+                new UserNotFoundException("No user found.", Map.of("Id", "No user with Id = " + id + "."))
+        );
+        userRepository.deleteById(id);
     }
 }

@@ -1,11 +1,7 @@
 package net.gb.knox.gatekeeper.annotation;
 
-import jakarta.validation.ConstraintViolation;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,7 +30,7 @@ public class ValidPasswordTest {
         var testModel = new TestModel("1234567");
 
         var violations = VALIDATOR_FIXTURE.getValidator().validate(testModel);
-        var errorMessages = getErrorMessages(violations);
+        var errorMessages = VALIDATOR_FIXTURE.getErrorMessages(violations);
 
         assertTrue(
                 errorMessages.contains(SIZE_CONSTRAINT_MESSAGE),
@@ -47,18 +43,12 @@ public class ValidPasswordTest {
         var testModel = new TestModel("password");
 
         var violations = VALIDATOR_FIXTURE.getValidator().validate(testModel);
-        var errorMessages = getErrorMessages(violations);
+        var errorMessages = VALIDATOR_FIXTURE.getErrorMessages(violations);
 
         assertTrue(
                 errorMessages.contains(REGEX_CONSTRAINT_MESSAGE),
                 "Expected " + REGEX_CONSTRAINT_MESSAGE + " to be in list " + errorMessages
         );
-    }
-
-    private ArrayList<String> getErrorMessages(Set<ConstraintViolation<TestModel>> violations) {
-        var errorMessages = new ArrayList<String>();
-        violations.iterator().forEachRemaining((item) -> errorMessages.add(item.getMessage()));
-        return errorMessages;
     }
 
     private record TestModel(@ValidPassword String field) {

@@ -55,7 +55,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUser(@PathVariable Long id) throws UserNotFoundException {
-        var userResponseDTO = userService.getUserById(id);
+        var userResponseDTO = userService.getUser(id);
         return ResponseEntity.ok(userResponseDTO);
     }
 
@@ -63,5 +63,11 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO) throws UserNotFoundException {
         var userResponseDTO = userService.updateUser(id, updateUserRequestDTO);
         return ResponseEntity.ok(userResponseDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) throws UserNotFoundException {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

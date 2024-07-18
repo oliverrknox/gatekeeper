@@ -1,21 +1,23 @@
 package net.gb.knox.gatekeeper.dto;
 
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
+import net.gb.knox.gatekeeper.annotation.ValidatorFixture;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UpdateUserRequestDTOTest {
 
-    private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
-    private static final Validator VALIDATOR = VALIDATOR_FACTORY.getValidator();
+    private static final ValidatorFixture VALIDATOR_FIXTURE = new ValidatorFixture();
 
     @AfterAll
     public static void tearDown() {
-        VALIDATOR_FACTORY.close();
+        VALIDATOR_FIXTURE.close();
     }
 
     @Test
@@ -28,11 +30,20 @@ public class UpdateUserRequestDTOTest {
 
     @Test
     public void testValidation() {
-        var updateUserRequestDTO = new UpdateUserRequestDTO("", null);
+        var expectedErrorMessages = new ArrayList<>(
+                Arrays.asList(
+                        "Password must contain at least one lowercase letter, one uppercase letter, and one digit.",
+                        "Password must be at least 8 characters long.")
+        );
+        var updateUserRequestDTO = new UpdateUserRequestDTO(null, "pass");
 
-        var violations = VALIDATOR.validate(updateUserRequestDTO);
+        var violations = VALIDATOR_FIXTURE.getValidator().validate(updateUserRequestDTO);
+        var actualErrorMessages = VALIDATOR_FIXTURE.getErrorMessages(violations);
 
-        assertEquals(1, violations.size());
-        assertEquals("Username is required.", violations.iterator().next().getMessage());
+        Collections.sort(expectedErrorMessages);
+        Collections.sort(actualErrorMessages);
+
+        assertEquals(2, violations.size());
+        assertArrayEquals(expectedErrorMessages.toArray(), actualErrorMessages.toArray());
     }
 }
