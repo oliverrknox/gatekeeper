@@ -30,10 +30,19 @@ public class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     private static final Long USER_ID = 1L;
-    private static final CreateUserRequestDTO CREATE_USER_REQUEST_DTO = new CreateUserRequestDTO("TestUser", "TestPassword1");
-    private static final UpdateUserRequestDTO UPDATE_USER_REQUEST_DTO = new UpdateUserRequestDTO("UpdatedUser");
+    private static final CreateUserRequestDTO CREATE_USER_REQUEST_DTO = new CreateUserRequestDTO(
+            "TestUser",
+            "TestPassword1"
+    );
+    private static final UpdateUserRequestDTO UPDATE_USER_REQUEST_DTO = new UpdateUserRequestDTO(
+            "UpdatedUser",
+            "UpdatedPassword1"
+    );
     private static final UserModel USER_MODEL = new UserModel("TestUser", "TestHash");
-    private static final UserModel UPDATED_USER_MODEL = new UserModel(UPDATE_USER_REQUEST_DTO.username(), USER_MODEL.getPasswordHash());
+    private static final UserModel UPDATED_USER_MODEL = new UserModel(
+            UPDATE_USER_REQUEST_DTO.username(),
+            UPDATE_USER_REQUEST_DTO.password()
+    );
 
     @BeforeAll
     public static void beforeAll() {

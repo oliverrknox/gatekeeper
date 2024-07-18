@@ -20,14 +20,15 @@ public class UpdateUserRequestDTOTest {
 
     @Test
     public void testConstructor() {
-        var updateUserRequestDTO = new UpdateUserRequestDTO("UpdatedUser");
+        var updateUserRequestDTO = new UpdateUserRequestDTO("UpdatedUser", "UpdatedPassword1");
 
         assertEquals("UpdatedUser", updateUserRequestDTO.username());
+        assertEquals("UpdatedPassword1", updateUserRequestDTO.password());
     }
 
     @Test
     public void testValidation() {
-        var updateUserRequestDTO = new UpdateUserRequestDTO("");
+        var updateUserRequestDTO = new UpdateUserRequestDTO("", null);
 
         var violations = VALIDATOR.validate(updateUserRequestDTO);
 

@@ -45,8 +45,17 @@ public class UserService {
     public UserResponseDTO updateUser(Long id, UpdateUserRequestDTO updateUserRequestDTO) throws UserNotFoundException {
         try {
             var existingUser = userRepository.getReferenceById(id);
-            var updatedUser = new UserModel(id, updateUserRequestDTO.username(), existingUser.getPasswordHash());
+
+            var username = updateUserRequestDTO.username() == null
+                    ? existingUser.getUsername()
+                    : updateUserRequestDTO.username();
+            var passwordHash = updateUserRequestDTO.password() == null
+                    ? existingUser.getPasswordHash()
+                    : passwordEncoder.encode(updateUserRequestDTO.password());
+
+            var updatedUser = new UserModel(id, username, passwordHash);
             var savedUser = userRepository.save(updatedUser);
+
             return new UserResponseDTO(savedUser.getId(), savedUser.getUsername());
         } catch (EntityNotFoundException exception) {
             throw new UserNotFoundException(

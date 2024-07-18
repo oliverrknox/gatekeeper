@@ -26,11 +26,22 @@ public class UserControllerTest {
     private UserService userService;
 
     private static final Long USER_ID = 1L;
-    private static final CreateUserRequestDTO CREATE_USER_REQUEST_DTO = new CreateUserRequestDTO("TestUser", "TestPassword1");
-    private static final UpdateUserRequestDTO UPDATE_USER_REQUEST_DTO = new UpdateUserRequestDTO("UpdateUser");
+    private static final CreateUserRequestDTO CREATE_USER_REQUEST_DTO = new CreateUserRequestDTO(
+            "TestUser",
+            "TestPassword1"
+    );
+    private static final UpdateUserRequestDTO UPDATE_USER_REQUEST_DTO = new UpdateUserRequestDTO(
+            "UpdateUser",
+            "UpdatedPassword1"
+    );
     private static final UserResponseDTO USER_RESPONSE_DTO = new UserResponseDTO(USER_ID, "TestUser");
-    private static final UserResponseDTO UPDATED_USER_RESPONSE_DTO = new UserResponseDTO(USER_ID, UPDATE_USER_REQUEST_DTO.username());
-    private static final UserNotFoundException USER_NOT_FOUND_EXCEPTION = new UserNotFoundException("Test user not found.");
+    private static final UserResponseDTO UPDATED_USER_RESPONSE_DTO = new UserResponseDTO(
+            USER_ID,
+            UPDATE_USER_REQUEST_DTO.username()
+    );
+    private static final UserNotFoundException USER_NOT_FOUND_EXCEPTION = new UserNotFoundException(
+            "Test user not found."
+    );
 
     @Test
     public void testCreateUser() throws URISyntaxException {
