@@ -2,6 +2,8 @@ package net.gb.knox.gatekeeper.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,12 +21,18 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(registry ->
                 registry.requestMatchers(
                         new AntPathRequestMatcher("/users/**"),
+                        new AntPathRequestMatcher("/auth/login"),
                         new AntPathRequestMatcher("/v3/api-docs*/**"),
                         new AntPathRequestMatcher("/swagger-ui/**")
                 ).permitAll()
         );
 
         return httpSecurity.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean

@@ -36,6 +36,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(UnauthorisedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUnauthorisedException(UnauthorisedException exception) {
+        var response = new ErrorResponseDTO(exception.getMessage(), exception.getErrorsByField());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGenericException() {
         var response = new ErrorResponseDTO("Something went wrong.");

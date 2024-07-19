@@ -53,6 +53,18 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
+    public void testHandleUnauthorisedException() {
+        final var unauthorisedException = new UnauthorisedException(MESSAGE, ERRORS_BY_FIELD);
+
+        var responseEntity = globalExceptionHandler.handleUnauthorisedException(unauthorisedException);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(MESSAGE, responseEntity.getBody().message());
+        assertEquals(ERRORS_BY_FIELD, responseEntity.getBody().errorsByField());
+    }
+
+    @Test
     public void testHandleGenericException() {
         var responseEntity = globalExceptionHandler.handleGenericException();
 

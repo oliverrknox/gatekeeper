@@ -61,4 +61,16 @@ public class UserRepositoryTest {
 
         assertNotNull(exception);
     }
+
+    @Test
+    public void testFindByUsername() {
+        var savedUser = userRepository.save(USER_MODEL);
+        entityManager.flush();
+
+        var foundUser = userRepository.findByUsername(USER_MODEL.getUsername());
+
+        assertEquals(savedUser.getId(), foundUser.getId());
+        assertEquals(USER_MODEL.getUsername(), foundUser.getUsername());
+        assertEquals(USER_MODEL.getPasswordHash(), foundUser.getPasswordHash());
+    }
 }

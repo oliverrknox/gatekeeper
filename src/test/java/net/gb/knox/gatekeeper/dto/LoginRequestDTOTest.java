@@ -11,7 +11,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CreateUserRequestDTOTest {
+public class LoginRequestDTOTest {
 
     private static final ValidatorFixture VALIDATOR_FIXTURE = new ValidatorFixture();
 
@@ -22,10 +22,10 @@ public class CreateUserRequestDTOTest {
 
     @Test
     public void testConstructor() {
-        var createUserRequestDTO = new CreateUserRequestDTO("TestUser", "Password1");
+        var loginRequestDTO = new LoginRequestDTO("TestUser", "Password1");
 
-        assertEquals("TestUser", createUserRequestDTO.username());
-        assertEquals("Password1", createUserRequestDTO.password());
+        assertEquals("TestUser", loginRequestDTO.username());
+        assertEquals("Password1", loginRequestDTO.password());
     }
 
     @Test
@@ -33,14 +33,12 @@ public class CreateUserRequestDTOTest {
         var expectedErrorMessages = new ArrayList<>(
                 Arrays.asList(
                         "Username is required.",
-                        "Password must contain at least one lowercase letter, one uppercase letter, and one digit.",
-                        "Password must be at least 8 characters long.",
                         "Password is required.")
         );
         Collections.sort(expectedErrorMessages);
-        var createUserRequestDTO = new CreateUserRequestDTO("", "");
+        var loginRequestDTO = new LoginRequestDTO("", "");
 
-        var violations = VALIDATOR_FIXTURE.getValidator().validate(createUserRequestDTO);
+        var violations = VALIDATOR_FIXTURE.getValidator().validate(loginRequestDTO);
 
         var actualErrorMessages = new ArrayList<String>();
         violations.iterator().forEachRemaining(item -> actualErrorMessages.add(item.getMessage()));
