@@ -14,6 +14,8 @@ import net.gb.knox.gatekeeper.dto.UpdateUserRequestDTO;
 import net.gb.knox.gatekeeper.dto.UserResponseDTO;
 import net.gb.knox.gatekeeper.exception.UserNotFoundException;
 import net.gb.knox.gatekeeper.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +30,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Operation(summary = "Create a new user.")
     @ApiResponse(
             responseCode = "201",
@@ -40,7 +44,10 @@ public class UserController {
     @GenericErrorApiResponse
     @PostMapping()
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody CreateUserRequestDTO createUserRequestDTO) throws URISyntaxException {
+        logger.info("ENTER createUser | username={}", createUserRequestDTO.username());
         var userResponseDTO = userService.createUser(createUserRequestDTO);
+
+        logger.info("EXIT createUser | username={} id={}", userResponseDTO.username(), userResponseDTO.id());
         return ResponseEntity
                 .created(new URI("/users/" + userResponseDTO.id()))
                 .body(userResponseDTO);
@@ -63,7 +70,10 @@ public class UserController {
     @GenericErrorApiResponse
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUser(@PathVariable Long id) throws UserNotFoundException {
+        logger.info("ENTER getUser | id={}", id);
         var userResponseDTO = userService.getUser(id);
+
+        logger.info("EXIT getUser | id={}", userResponseDTO.id());
         return ResponseEntity.ok(userResponseDTO);
     }
 
@@ -85,7 +95,10 @@ public class UserController {
     @GenericErrorApiResponse
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO) throws UserNotFoundException {
+        logger.info("ENTER updateUser | id={}", id);
         var userResponseDTO = userService.updateUser(id, updateUserRequestDTO);
+
+        logger.info("EXIT updateUser | id={}", userResponseDTO.id());
         return ResponseEntity.ok(userResponseDTO);
     }
 
@@ -106,7 +119,10 @@ public class UserController {
     @GenericErrorApiResponse
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) throws UserNotFoundException {
+        logger.info("ENTER deleteUser | id={}", id);
         userService.deleteUser(id);
+
+        logger.info("EXIT deleteUser | id={}", id);
         return ResponseEntity.noContent().build();
     }
 }

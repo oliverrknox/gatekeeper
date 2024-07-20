@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import net.gb.knox.gatekeeper.dto.ErrorResponseDTO;
 import net.gb.knox.gatekeeper.utility.JWTUtility;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,22 +23,25 @@ import java.io.IOException;
 @Component
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private JWTUtility jwtUtility;
     @Autowired
     private UserDetailsService userDetailsService;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request,
                                     @NotNull HttpServletResponse response,
                                     @NotNull FilterChain filterChain) {
+        logger.info("ENTER doFilterInternal");
         try {
-
             final var bearerPrefix = "Bearer ";
             var bearerToken = request.getHeader("Authorization");
 
             if (bearerToken == null || !bearerToken.startsWith(bearerPrefix)) {
+                logger.info("EXIT EARLY doFilterInternal | reason=Bearer token is invalid.");
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -44,6 +49,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             var token = bearerToken.substring(bearerPrefix.length());
 
             if (!jwtUtility.verifyToken(token)) {
+                logger.info("EXIT EARLY doFilterInternal | reason=Unable to verify token.");
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -51,6 +57,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             var username = jwtUtility.decodeToken(token).getSubject();
 
             if (username == null) {
+                logger.info("EXIT EARLY doFilterInternal | reason=No username in token.");
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -60,8 +67,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
+            logger.info("EXIT doFilterInternal");
             filterChain.doFilter(request, response);
         } catch (Exception ex) {
+            logger.info("Exception doFilterInternal | message={}", ex.getMessage());
+
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
@@ -74,7 +84,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                     writer.write(json);
                     writer.flush();
                 }
-            } catch (IOException ignored) {
+            } catch (IOException ioEx) {
+                logger.info("IOException doFilterInternal | message={}", ioEx.getMessage());
             }
         }
     }

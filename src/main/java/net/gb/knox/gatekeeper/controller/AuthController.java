@@ -27,9 +27,8 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    @Autowired
-    private JWTUtility jwtUtility;
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Operation(summary = "Login as an existing user.")
     @ApiResponse(
@@ -76,9 +75,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponseDTO> refresh(@CookieValue(value = JWTUtility.REFRESH_COOKIE_NAME) String refreshToken,
                                                     HttpServletResponse httpServletResponse) throws UnauthorisedException {
-        var username = jwtUtility.decodeToken(refreshToken).getSubject();
-        logger.info("ENTER refresh | username={}", username);
-
+        logger.info("ENTER refresh");
         var refreshPair = authService.refresh(refreshToken);
 
         var tokenResponseDTO = refreshPair.getLeft();
@@ -86,7 +83,7 @@ public class AuthController {
 
         httpServletResponse.addCookie(refreshCookie);
 
-        logger.info("EXIT refresh | username={}", username);
+        logger.info("EXIT refresh");
         return ResponseEntity.ok(tokenResponseDTO);
     }
 }
