@@ -1,4 +1,4 @@
-package net.gb.knox.gatekeeper.component;
+package net.gb.knox.gatekeeper.utility;
 
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
@@ -11,37 +11,34 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class JWTTest {
+public class JWTUtilityTest {
 
     @Autowired
-    private JWT jwt;
+    private JWTUtility jwtUtility;
     @Autowired
     private Environment environment;
 
     @Test
     public void testCreateToken() {
-        var token = jwt.createToken("TestUser");
+        var token = jwtUtility.createToken("TestUser");
         assertNotNull(token);
     }
 
     @Test
     public void testVerifyToken() {
-        var token = jwt.createToken("TestUser");
-        var isVerified = jwt.verifyToken(token);
+        var token = jwtUtility.createToken("TestUser");
+        var isVerified = jwtUtility.verifyToken(token);
 
         assertTrue(isVerified);
     }
 
     @Test
     public void testDecodeToken() {
-        var expireAfterMs = environment.getProperty("gatekeeper.jwt.expire-after-ms", Long.class);
-        if (expireAfterMs == null) {
-            throw new TestAbortedException("Property ${gatekeeper.jwt.expire-after-ms} was unable to be cast to a Long.");
-        }
 
-        var token = jwt.createToken("TestUser");
+
+        var token = jwtUtility.createToken("TestUser");
         System.out.println(token);
-        var claims = jwt.decodeToken(token);
+        var claims = jwtUtility.decodeToken(token);
 
         assertEquals("TestUser", claims.getSubject());
         assertEquals(environment.getProperty("gatekeeper.jwt.issuer"), claims.getIssuer());
@@ -55,5 +52,22 @@ public class JWTTest {
                 "Expected " + claims.getIssuedAt().getTime() + " to be before " + now
         );
         assertTrue(claims.getExpiration().after(new Date()));
+    }
+
+    @Test
+    public void testCreateRefreshTokenCookie() {
+        var refreshExpireAfterMs = environment.getProperty("gatekeeper.jwt.refresh-expire-after-ms", Long.class);
+        if (refreshExpireAfterMs == null) {
+            throw new TestAbortedException("Property ${gatekeeper.jwt.expire-after-ms} was unable to be cast to a Long.");
+        }
+
+        var refreshCookie = jwtUtility.createRefreshTokenCookie("TestUser");
+
+        assertEquals(JWTUtility.REFRESH_COOKIE_NAME, refreshCookie.getName());
+        assertNotNull(refreshCookie.getValue());
+        assertTrue(refreshCookie.isHttpOnly());
+        assertTrue(refreshCookie.getSecure());
+        assertEquals("/", refreshCookie.getPath());
+        assertEquals(refreshExpireAfterMs / 1000, refreshCookie.getMaxAge());
     }
 }

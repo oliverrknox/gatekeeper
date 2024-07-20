@@ -1,9 +1,11 @@
 package net.gb.knox.gatekeeper.service;
 
-import net.gb.knox.gatekeeper.component.JWT;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
 import net.gb.knox.gatekeeper.config.AuthenticationFixture;
 import net.gb.knox.gatekeeper.dto.LoginRequestDTO;
 import net.gb.knox.gatekeeper.exception.UnauthorisedException;
+import net.gb.knox.gatekeeper.utility.JWTUtility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -24,23 +27,30 @@ public class AuthServiceTest {
             "TestUser",
             "TestPassword"
     );
-    private static final String TOKEN = "jwt token";
+    private static final String TOKEN = "jwt-token";
+    private static final Cookie REFRESH_COOKIE = new Cookie("refresh", "refresh-token");
+
     @Autowired
     private AuthService authService;
     @MockBean
     private AuthenticationManager authenticationManager;
     @MockBean
-    private JWT jwt;
+    private JWTUtility jwtUtility;
 
     @Test
     public void testLogin() throws UnauthorisedException {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(AuthenticationFixture.AUTHENTICATION);
-        when(jwt.createToken(anyString())).thenReturn(TOKEN);
+        when(jwtUtility.createToken(anyString())).thenReturn(TOKEN);
+        when(jwtUtility.createRefreshTokenCookie(anyString())).thenReturn(REFRESH_COOKIE);
 
-        var tokenResponseDTO = authService.login(LOGIN_REQUEST_DTO);
+        var loginPair = authService.login(LOGIN_REQUEST_DTO);
+
+        var tokenResponseDTO = loginPair.getLeft();
+        var refreshCookie = loginPair.getRight();
 
         assertEquals(TOKEN, tokenResponseDTO.token());
+        assertEquals(REFRESH_COOKIE, refreshCookie);
     }
 
     @Test
@@ -52,5 +62,33 @@ public class AuthServiceTest {
 
         assertNotNull(exception);
         assertEquals("Username and/or password is invalid.", exception.getMessage());
+    }
+
+    @Test
+    public void testRefresh() throws UnauthorisedException {
+        var claimsMock = mock(Claims.class);
+        when(jwtUtility.verifyToken(anyString())).thenReturn(true);
+        when(jwtUtility.decodeToken(anyString())).thenReturn(claimsMock);
+        when(claimsMock.getSubject()).thenReturn("TestUser");
+        when(jwtUtility.createToken(anyString())).thenReturn(TOKEN);
+        when(jwtUtility.createRefreshTokenCookie(anyString())).thenReturn(REFRESH_COOKIE);
+
+        var refreshPair = authService.refresh(REFRESH_COOKIE.getValue());
+
+        var tokenResponseDTO = refreshPair.getLeft();
+        var refreshCookie = refreshPair.getRight();
+
+        assertEquals(TOKEN, tokenResponseDTO.token());
+        assertEquals(REFRESH_COOKIE, refreshCookie);
+    }
+
+    @Test
+    public void testRefreshException() {
+        when(jwtUtility.verifyToken(anyString())).thenReturn(false);
+
+        var exception = assertThrows(UnauthorisedException.class, () -> authService.refresh(REFRESH_COOKIE.getValue()));
+
+        assertNotNull(exception);
+        assertEquals("Unable to authenticate your token.", exception.getMessage());
     }
 }
