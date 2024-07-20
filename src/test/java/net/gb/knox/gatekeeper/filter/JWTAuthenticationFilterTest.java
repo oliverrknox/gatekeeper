@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -36,6 +37,7 @@ public class JWTAuthenticationFilterTest {
     public void testDoFilterInternal() {
         var token = jwtUtility.createToken("TestUser");
         when(HTTP_SERVLET_REQUEST_MOCK.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(mock(UserDetails.class));
 
         jwtAuthenticationFilter.doFilterInternal(
                 HTTP_SERVLET_REQUEST_MOCK,
