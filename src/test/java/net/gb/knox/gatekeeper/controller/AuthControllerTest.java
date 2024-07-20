@@ -6,6 +6,7 @@ import net.gb.knox.gatekeeper.dto.LoginRequestDTO;
 import net.gb.knox.gatekeeper.dto.TokenResponseDTO;
 import net.gb.knox.gatekeeper.exception.UnauthorisedException;
 import net.gb.knox.gatekeeper.service.AuthService;
+import net.gb.knox.gatekeeper.utility.JWTUtility;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,24 +26,29 @@ public class AuthControllerTest {
             "TestUser",
             "Password1"
     );
-    private static final Cookie REFRESH_COOKIE = new Cookie("refresh", "refresh-token");
     private static final TokenResponseDTO TOKEN_RESPONSE_DTO = new TokenResponseDTO("token");
     private static final UnauthorisedException UNAUTHORISED_EXCEPTION = new UnauthorisedException("Test unauthorised.");
     private static final HttpServletResponse HTTP_SERVLET_RESPONSE_MOCK = mock(HttpServletResponse.class);
 
+    private Cookie refreshCookie;
+
     @Autowired
     private AuthController authController;
+    @Autowired
+    private JWTUtility jwtUtility;
     @MockBean
     private AuthService authService;
 
     @BeforeEach
     public void setup() {
         reset(HTTP_SERVLET_RESPONSE_MOCK);
+
+        refreshCookie = new Cookie("refresh", jwtUtility.createToken("TestUser"));
     }
 
     @Test
     public void testLogin() throws UnauthorisedException {
-        when(authService.login(LOGIN_REQUEST_DTO)).thenReturn(ImmutablePair.of(TOKEN_RESPONSE_DTO, REFRESH_COOKIE));
+        when(authService.login(LOGIN_REQUEST_DTO)).thenReturn(ImmutablePair.of(TOKEN_RESPONSE_DTO, refreshCookie));
 
         var responseEntity = authController.login(LOGIN_REQUEST_DTO, HTTP_SERVLET_RESPONSE_MOCK);
 
@@ -50,7 +56,7 @@ public class AuthControllerTest {
         assertEquals(TOKEN_RESPONSE_DTO, responseEntity.getBody());
         verify(HTTP_SERVLET_RESPONSE_MOCK, times(1))
                 .addCookie(
-                        argThat(cookie -> cookie.getName().equals(REFRESH_COOKIE.getName()))
+                        argThat(cookie -> cookie.getName().equals(refreshCookie.getName()))
                 );
     }
 
@@ -65,24 +71,24 @@ public class AuthControllerTest {
 
     @Test
     public void testRefresh() throws UnauthorisedException {
-        when(authService.refresh(REFRESH_COOKIE.getValue())).thenReturn(ImmutablePair.of(TOKEN_RESPONSE_DTO, REFRESH_COOKIE));
+        when(authService.refresh(refreshCookie.getValue())).thenReturn(ImmutablePair.of(TOKEN_RESPONSE_DTO, refreshCookie));
 
-        var responseEntity = authController.refresh(REFRESH_COOKIE.getValue(), HTTP_SERVLET_RESPONSE_MOCK);
+        var responseEntity = authController.refresh(refreshCookie.getValue(), HTTP_SERVLET_RESPONSE_MOCK);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(TOKEN_RESPONSE_DTO, responseEntity.getBody());
         verify(HTTP_SERVLET_RESPONSE_MOCK, times(1))
                 .addCookie(
-                        argThat(cookie -> cookie.getName().equals(REFRESH_COOKIE.getName()))
+                        argThat(cookie -> cookie.getName().equals(refreshCookie.getName()))
                 );
     }
 
     @Test
     public void testRefreshException() throws UnauthorisedException {
-        when(authService.refresh(REFRESH_COOKIE.getValue())).thenThrow(UNAUTHORISED_EXCEPTION);
+        when(authService.refresh(refreshCookie.getValue())).thenThrow(UNAUTHORISED_EXCEPTION);
 
         var exception = assertThrows(UnauthorisedException.class, () -> authController.refresh(
-                REFRESH_COOKIE.getValue(),
+                refreshCookie.getValue(),
                 HTTP_SERVLET_RESPONSE_MOCK
         ));
 

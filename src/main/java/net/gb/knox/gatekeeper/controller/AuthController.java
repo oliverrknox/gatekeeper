@@ -15,6 +15,8 @@ import net.gb.knox.gatekeeper.dto.TokenResponseDTO;
 import net.gb.knox.gatekeeper.exception.UnauthorisedException;
 import net.gb.knox.gatekeeper.service.AuthService;
 import net.gb.knox.gatekeeper.utility.JWTUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    @Autowired
+    private JWTUtility jwtUtility;
 
     @Operation(summary = "Login as an existing user.")
     @ApiResponse(
@@ -38,13 +43,18 @@ public class AuthController {
     @UnauthorisedApiResponse
     @GenericErrorApiResponse
     @PostMapping("/login")
-    public ResponseEntity<TokenResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO, HttpServletResponse response) throws UnauthorisedException {
+    public ResponseEntity<TokenResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO,
+                                                  HttpServletResponse httpServletResponse) throws UnauthorisedException {
+        logger.info("ENTER login | username={}", loginRequestDTO.username());
+
         var loginPair = authService.login(loginRequestDTO);
 
         var tokenResponseDTO = loginPair.getLeft();
         var refreshCookie = loginPair.getRight();
 
-        response.addCookie(refreshCookie);
+        httpServletResponse.addCookie(refreshCookie);
+
+        logger.info("EXIT login | username={}", loginRequestDTO.username());
         return ResponseEntity.ok(tokenResponseDTO);
     }
 
@@ -64,13 +74,19 @@ public class AuthController {
     @ForbiddenApiResponse
     @GenericErrorApiResponse
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponseDTO> refresh(@CookieValue(value = JWTUtility.REFRESH_COOKIE_NAME) String refreshToken, HttpServletResponse response) throws UnauthorisedException {
+    public ResponseEntity<TokenResponseDTO> refresh(@CookieValue(value = JWTUtility.REFRESH_COOKIE_NAME) String refreshToken,
+                                                    HttpServletResponse httpServletResponse) throws UnauthorisedException {
+        var username = jwtUtility.decodeToken(refreshToken).getSubject();
+        logger.info("ENTER refresh | username={}", username);
+
         var refreshPair = authService.refresh(refreshToken);
 
         var tokenResponseDTO = refreshPair.getLeft();
         var refreshCookie = refreshPair.getRight();
 
-        response.addCookie(refreshCookie);
+        httpServletResponse.addCookie(refreshCookie);
+
+        logger.info("EXIT refresh | username={}", username);
         return ResponseEntity.ok(tokenResponseDTO);
     }
 }

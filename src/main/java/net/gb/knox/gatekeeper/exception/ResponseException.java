@@ -21,4 +21,11 @@ public class ResponseException extends Exception {
     public Map<String, String> getErrorsByField() {
         return errorsByField;
     }
+
+    @Override
+    public String toString() {
+        return "ResponseException{" +
+                "message=" + getMessage() + "," +
+                "errorsByField=" + errorsByField + "}";
+    }
 }

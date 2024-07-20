@@ -7,10 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 public class GlobalExceptionHandlerTest {
 
@@ -18,6 +20,7 @@ public class GlobalExceptionHandlerTest {
 
     private static final String MESSAGE = "Test exception message.";
     private static final Map<String, String> ERRORS_BY_FIELD = Map.of("Error key", "Error value");
+    private static final WebRequest WEB_REQUEST_MOCK = mock(WebRequest.class);
 
     @BeforeEach()
     public void Setup() {
@@ -28,7 +31,7 @@ public class GlobalExceptionHandlerTest {
     public void testHandleUserNotFoundException() {
         final var userNotFoundException = new UserNotFoundException(MESSAGE, ERRORS_BY_FIELD);
 
-        var responseEntity = globalExceptionHandler.handleUserNotFoundException(userNotFoundException);
+        var responseEntity = globalExceptionHandler.handleUserNotFoundException(userNotFoundException, WEB_REQUEST_MOCK);
 
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertNotNull(responseEntity.getBody());
@@ -43,7 +46,7 @@ public class GlobalExceptionHandlerTest {
         final var methodParameter = new MethodParameter(this.getClass().getMethods()[0], -1);
         final var methodArgumentNotValidException = new MethodArgumentNotValidException(methodParameter, bindingResult);
 
-        var responseEntity = globalExceptionHandler.handleValidationException(methodArgumentNotValidException);
+        var responseEntity = globalExceptionHandler.handleValidationException(methodArgumentNotValidException, WEB_REQUEST_MOCK);
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertNotNull(responseEntity.getBody());
@@ -56,7 +59,7 @@ public class GlobalExceptionHandlerTest {
     public void testHandleUnauthorisedException() {
         final var unauthorisedException = new UnauthorisedException(MESSAGE, ERRORS_BY_FIELD);
 
-        var responseEntity = globalExceptionHandler.handleUnauthorisedException(unauthorisedException);
+        var responseEntity = globalExceptionHandler.handleUnauthorisedException(unauthorisedException, WEB_REQUEST_MOCK);
 
         assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
         assertNotNull(responseEntity.getBody());
@@ -66,7 +69,7 @@ public class GlobalExceptionHandlerTest {
 
     @Test
     public void testHandleGenericException() {
-        var responseEntity = globalExceptionHandler.handleGenericException();
+        var responseEntity = globalExceptionHandler.handleGenericException(new Exception(), WEB_REQUEST_MOCK);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertNotNull(responseEntity.getBody());
