@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import net.gb.knox.gatekeeper.dto.CreateUserRequestDTO;
 import net.gb.knox.gatekeeper.dto.ErrorResponseDTO;
@@ -53,7 +54,10 @@ public class UserController {
                 .body(userResponseDTO);
     }
 
-    @Operation(summary = "Get a user by id.")
+    @Operation(
+            summary = "Get a user by id.",
+            security = @SecurityRequirement(name = "jwt")
+    )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -88,7 +92,8 @@ public class UserController {
 
     @Operation(
             summary = "Update a user's properties.",
-            description = "The username and/or password can be updated via this endpoint."
+            description = "The username and/or password can be updated via this endpoint.",
+            security = @SecurityRequirement(name = "jwt")
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -122,7 +127,10 @@ public class UserController {
         return ResponseEntity.ok(userResponseDTO);
     }
 
-    @Operation(summary = "Delete a user by id.")
+    @Operation(
+            summary = "Delete a user by id.",
+            security = @SecurityRequirement(name = "jwt")
+    )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "204",

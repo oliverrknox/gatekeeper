@@ -2,6 +2,7 @@ package net.gb.knox.gatekeeper.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,11 +21,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(registry ->
                 registry.requestMatchers(
-                        new AntPathRequestMatcher("/users/**"),
-                        new AntPathRequestMatcher("/auth/login"),
-                        new AntPathRequestMatcher("/v3/api-docs*/**"),
-                        new AntPathRequestMatcher("/swagger-ui/**")
-                ).permitAll()
+                                new AntPathRequestMatcher("/users", HttpMethod.POST.name()),
+                                new AntPathRequestMatcher("/auth/login", HttpMethod.POST.name()),
+                                new AntPathRequestMatcher("/v3/api-docs*/**"),
+                                new AntPathRequestMatcher("/swagger-ui/**"))
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
         );
 
         return httpSecurity.build();
