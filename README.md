@@ -31,6 +31,7 @@ An authentication and authorisation API.
 - [Maven](https://maven.apache.org)
 - [Spring Boot](https://spring.io/projects/spring-boot)
 - [PostgreSQL](https://www.postgresql.org/)
+- [Docker](https://www.docker.com)
 
 ## Installation
 
@@ -73,8 +74,8 @@ Instructions to configure the microservice.
 
 - **Environment Variables**
     - `JWT_SECRET_BASE64`: A 256 byte key encoded in Base 64. Used to generate JWT tokens.
-    - `PSQL_USERNAME`: The username of a PostgreSQL user for this microservice.
-    - `PSQL_PASSWORD`: The password of a PostgreSQL user for this microservice.
+  - `DB_USER`: The username of a database user for this microservice.
+  - `DB_PASSWORD`: The password of a database user for this microservice.
 
 ## Usage
 
@@ -132,6 +133,45 @@ Instructions for deploying the microservice to different environments.
 ### Local Deployment
 
 Instructions for running the microservice locally.
+
+Docker is used to run the microservice and database. First we need to run Docker Compose and then set up a database user
+for the microservice.
+
+To start docker:
+
+```bash
+export POSTGRES_USER=postgres;      # The default user for PostgreSQL superuser.
+export POSTGRES_PASSWORD=password;  # The default password for PostgreSQL superuser.
+export DB_USER=gatekeeper;          # The PostgreSQL user dedicated to this microservice.
+export DB_PASSWORD=password;        # The password for the dedicated PostgreSQL user of this microservice.
+export JWT_SECRET_BASE64=x52/...;   # A 256 byte key encoded in Base 64. Used to generate JWT tokens.
+
+docker compose up
+```
+
+Once docker has started and span up the containers the database user needs to be configured (specified by `DB_*`
+environment variables).
+
+To log on to a Postgres instance in docker:
+
+```bash
+$ docker ps
+
+CONTAINER ID   IMAGE            COMMAND                  CREATED         STATUS                   PORTS                    NAMES
+6f50803c9bd4   gatekeeper-app   "/__cacert_entrypoin…"   9 minutes ago   Up 5 seconds             0.0.0.0:8080->8080/tcp   gatekeeper-app-1
+aea809f0f863   postgres         "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes (healthy)   5432/tcp                 gatekeeper-db-1
+```
+
+Copy the `CONTAINER ID` of the `postgres` image and run:
+
+```bash
+docker exec -it <CONTAINER_ID> psql -U <POSTGRES_USER>
+```
+
+This will open `psql` in the console. To create a user with the necessary permissions execute
+the [SQL script](scripts/grant-privileges.sql) in this repository.
+
+After restarting the docker image the microservice will be accessible on port 8080.
 
 ### Production Deployment
 
