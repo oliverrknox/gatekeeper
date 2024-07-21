@@ -134,8 +134,15 @@ Instructions for deploying the microservice to different environments.
 
 Instructions for running the microservice locally.
 
-Docker is used to run the microservice and database. First we need set up the initialisation scripts and then run Docker
-Compose to set up the database and microservice.
+Docker is used to run the microservice and database. First we need to build the microservice, set up the initialisation
+scripts and then run docker
+compose to set up the database and microservice.
+
+To build:
+
+```bash
+./mvnw clean package
+```
 
 To set up the initialisation scripts:
 
