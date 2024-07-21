@@ -1,5 +1,5 @@
 services:
-  db:
+  database:
     image: postgres
     restart: always
     environment:
@@ -9,6 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/data/pgdata
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD", "pg_isready", "-d", "gatekeeper" ]
       interval: 10s
@@ -21,12 +22,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/gatekeeper
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/gatekeeper
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET_BASE64: ${JWT_SECRET_BASE64}
     depends_on:
-      db:
+      database:
         condition: service_healthy
 
 volumes:

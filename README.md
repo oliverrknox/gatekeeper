@@ -134,8 +134,15 @@ Instructions for deploying the microservice to different environments.
 
 Instructions for running the microservice locally.
 
-Docker is used to run the microservice and database. First we need to run Docker Compose and then set up a database user
+Docker is used to run the microservice and database. First we need set up the initialisation scripts and then run Docker
+Compose to set up the database and microservice.
+
+To set up the initialisation scripts:
+
+Go to the [init SQL file](scripts/init.sql) and change the `username` and `password` field to the desired database user
 for the microservice.
+This should be equal to `DB_USER` and `DB_PASSWORD` environment variables. Once the database service starts it will
+automatically copy and run the SQL queries in this file.
 
 To start docker:
 
@@ -149,29 +156,7 @@ export JWT_SECRET_BASE64=x52/...;   # A 256 byte key encoded in Base 64. Used to
 docker compose up
 ```
 
-Once docker has started and span up the containers the database user needs to be configured (specified by `DB_*`
-environment variables).
-
-To log on to a Postgres instance in docker:
-
-```bash
-$ docker ps
-
-CONTAINER ID   IMAGE            COMMAND                  CREATED         STATUS                   PORTS                    NAMES
-6f50803c9bd4   gatekeeper-app   "/__cacert_entrypoin…"   9 minutes ago   Up 5 seconds             0.0.0.0:8080->8080/tcp   gatekeeper-app-1
-aea809f0f863   postgres         "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes (healthy)   5432/tcp                 gatekeeper-db-1
-```
-
-Copy the `CONTAINER ID` of the `postgres` image and run:
-
-```bash
-docker exec -it <CONTAINER_ID> psql -U <POSTGRES_USER>
-```
-
-This will open `psql` in the console. To create a user with the necessary permissions execute
-the [SQL script](scripts/grant-privileges.sql) in this repository.
-
-After restarting the docker image the microservice will be accessible on port 8080.
+After the docker image has started the microservice will be accessible on port 8080.
 
 ### Production Deployment
 
