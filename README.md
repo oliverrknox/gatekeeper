@@ -61,7 +61,7 @@ Ensure you have the following installed:
 
 Instructions to configure the microservice.
 
-- **application.properties**
+- **application-local.properties**
     - HTTPS is required to provide a secure cookie containing a refresh token. This can be achieved by setting the
       following properties and generating the `keystore.p12` file
       using [keytool](https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html).
@@ -71,6 +71,7 @@ Instructions to configure the microservice.
         server.ssl.key-store-type=PKCS12
         server.ssl.key-alias=tomcat
         ```
+  - This requires running the jar with `--spring.profiles.active=local` or using the `docker-compose-local.yml` file.
 
 - **Environment Variables**
     - `JWT_SECRET_BASE64`: A 256 byte key encoded in Base 64. Used to generate JWT tokens.
@@ -168,6 +169,48 @@ After the docker image has started the microservice will be accessible on port 8
 ### Production Deployment
 
 Instructions for deploying the microservice to production, including any CI/CD steps.
+
+Docker is also used to run the microservice and database in production. Similar steps as a local deployment are followed
+but some additional work is required to move the neccessary files to the server.
+
+To build:
+
+```bash
+./mvnw clean package # build jar.
+docker build -t $DOCKER_USERNAME/gatekeeper:latest . # build docker image.
+docker login # login to docker hub.
+docker push $DOCKER_USERNAME/gatekeeper:latest # publish docker image.
+```
+
+Then to transfer files to the server:
+
+```bash
+ssh $DROPLET_USERNAME@$DROPLET_HOST # login to server via ssh.
+mkdir -p services/gatekeeper/scripts # set up directory structure.
+exit # exit ssh for now.
+
+scp docker-compose.yml $DROPLET_USERNAME@$DROPLET_HOST:/services/gatekeeper
+scp scripts/init.sql $DROPLET_USERNAME@$DROPLET_HOST:/services/gatekeeper/scripts
+```
+
+Make sure to set all the necessary environment variables as documented above plus an additional one:
+
+```bash
+export DOCKER_USERNAME=<your-docker-username>
+```
+
+Then the following commands will configure and spin up a new microservice and dependencies:
+
+```bash
+docker compose down # remove an existing containers.
+sed -i -e "s/username/${DB_USER}/g" \ 
+    -i -e "s/password/${DB_PASSWORD}/g" \
+    scripts/init.sql # replace default username and password in init.sql with environment variable on server.
+docker pull ${DOCKER_USERNAME}/gatekeeper:latest # pull latest docker image.
+docker compose up -d # run detatched instance of docker compose.
+```
+
+After the docker image has started the microservice will be accessible on port 8080.
 
 ## Contributing
 
