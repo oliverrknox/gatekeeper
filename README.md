@@ -1,6 +1,9 @@
 # Gatekeeper
 
-![License](https://img.shields.io/github/license/oliverknox/gatekeeper)
+![License](https://img.shields.io/github/license/oliverrknox/gatekeeper)
+
+> [!CAUTION]
+> The purpose of this project is to gain a better understanding of user authentication and authorisation. This is not suitable for real applications.
 
 ## Overview
 
@@ -46,7 +49,7 @@ Ensure you have the following installed:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/oliverknox/gatekeeper.git
+   git clone https://github.com/oliverrknox/gatekeeper.git
    ```
 2. Navigate to the project directory:
    ```bash
@@ -228,7 +231,7 @@ This project is licensed under the [MIT License](LICENSE).
 ## Contact
 
 - **Author**: Oliver Knox
-- **Email**: oliver@knox.gb.net
-- **GitHub**: [oliverknox](https://github.com/oliverknox)
+- **Email**: hi@oliverknox.io
+- **GitHub**: [oliverrknox](https://github.com/oliverrknox)
 
 ---
