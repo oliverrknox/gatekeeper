@@ -111,7 +111,7 @@ curl -X 'POST' \
 ## API Documentation
 
 The API is documented using [OpenAPI V3](https://swagger.io/specification/),
-the [Swagger UI](https://api.knox.gb.net/gatekeeper/swagger-ui/index.html) is publicly available.
+the [Swagger UI](https://api.oliverknox.io/gatekeeper/swagger-ui/index.html) is publicly available.
 
 ## Testing
 
